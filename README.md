@@ -1,6 +1,3 @@
-
-<img width="1749" height="547" alt="tela" src="https://github.com/user-attachments/assets/ad56f47a-0b48-4d66-8945-dae75c411fe1" />
-
 > ### 🏗️ <span style="color: #e67e22;">COMUNICADO: Mudança de Domínio Oficial</span>
 > Informamos que o endereço eletrônico do Serviço de Registro de Imóveis de Assis Chateaubriand/PR está em processo de migração.
 
