@@ -1,0 +1,10 @@
+# Your site's settings
+lang: pt-BR # e.g. uk, pl, en-US
+bg_color: dark # can be dark, light or auto
+# theme-color is the main accent color and can be red, pink, fuchsia, purple, violet, indigo, blue, azure, cyan, jade, green,
+# lime, yellow, amber, pumpkin, orange, sand, grey, zinc, slate. See samples on https://picocss.com/docs/version-picker
+theme_color: azure
+title: Registro de Imóveis de Assis Chateaubriand
+description: Em breve, aqui o novo site do Registro de Imóveis de Assis Chateaubriand.
+keywords: cartorioassis, cartorio, registro
+remote_theme: devich/quick@0.0.1
