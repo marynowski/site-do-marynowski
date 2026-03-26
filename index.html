@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinanceiroApp</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --surface: #13141a;
+    --surface2: #1c1e28;
+    --border: #2a2d3e;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --green: #43e97b;
+    --yellow: #f7c948;
+    --red: #ff6584;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Sora', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+
+  /* === LOGIN === */
+  #loginPage {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 20% 50%, #1a1040 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, #0d1f3c 0%, transparent 50%),
+                var(--bg);
+  }
+  .login-box {
+    width: 380px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  }
+  .login-logo {
+    font-size: 13px;
+    font-family: var(--mono);
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .login-title { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+  .input-group { margin-bottom: 16px; }
+  .input-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.5px; font-family: var(--mono); }
+  .input-group input {
+    width: 100%; padding: 12px 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 14px;
+    font-family: var(--sans); outline: none; transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%; padding: 13px; background: var(--accent); color: white;
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+    cursor: pointer; font-family: var(--sans); margin-top: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .login-error { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+
+  /* === APP === */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 230px;
+    background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; z-index: 100; padding: 24px 0;
+  }
+  .sidebar-logo {
+    padding: 0 24px 24px; font-family: var(--mono); font-size: 11px;
+    color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo span { display: block; font-family: var(--sans); font-size: 18px; font-weight: 800; color: var(--text); letter-spacing: 0; margin-top: 4px; }
+  .nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px; cursor: pointer;
+    font-size: 14px; color: var(--muted); transition: all 0.2s; border: none;
+    background: transparent; width: 100%; text-align: left; font-family: var(--sans);
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .nav-item svg { flex-shrink: 0; }
+  .sidebar-bottom { padding: 12px; border-top: 1px solid var(--border); }
+  .logout-btn {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 10px 12px; border-radius: 10px; cursor: pointer;
+    font-size: 14px; color: var(--muted); background: transparent; border: none;
+    font-family: var(--sans); transition: all 0.2s;
+  }
+  .logout-btn:hover { background: rgba(255,101,132,0.1); color: var(--red); }
+
+  /* Main content */
+  .main { margin-left: 230px; padding: 32px; flex: 1; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+  /* Month selector */
+  .month-tabs {
+    display: flex; gap: 8px; margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .month-tab {
+    padding: 7px 18px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border); background: transparent;
+    color: var(--muted); font-family: var(--sans); transition: all 0.2s;
+  }
+  .month-tab:hover { color: var(--text); border-color: var(--accent); }
+  .month-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Cards grid */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px 22px;
+  }
+  .card-label { font-size: 11px; color: var(--muted); font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .card-value { font-size: 26px; font-weight: 700; font-family: var(--mono); }
+  .card-value.green { color: var(--green); }
+  .card-value.red { color: var(--red); }
+  .card-value.yellow { color: var(--yellow); }
+  .card-value.purple { color: var(--accent); }
+
+  /* Tables */
+  .section-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th { padding: 10px 14px; text-align: left; font-size: 11px; color: var(--muted); font-family: var(--mono); letter-spacing: 0.5px; font-weight: 500; }
+  td { padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; font-family: var(--mono);
+  }
+  .badge-purple { background: rgba(108,99,255,0.15); color: var(--accent); }
+  .badge-green { background: rgba(67,233,123,0.15); color: var(--green); }
+  .badge-red { background: rgba(255,101,132,0.15); color: var(--red); }
+  .badge-yellow { background: rgba(247,201,72,0.15); color: var(--yellow); }
+  .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .badge-gray { background: rgba(107,114,128,0.15); color: var(--muted); }
+
+  /* Sections */
+  .section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px; margin-bottom: 20px;
+  }
+
+  /* Forms */
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 11px; color: var(--muted); font-family: var(--mono); letter-spacing: 0.5px; }
+  .form-group input, .form-group select {
+    padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-size: 13px;
+    font-family: var(--sans); outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .form-group select option { background: var(--surface2); }
+  .btn-add {
+    padding: 10px 22px; background: var(--accent); color: white;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: var(--sans); transition: opacity 0.2s;
+  }
+  .btn-add:hover { opacity: 0.85; }
+  .btn-del {
+    padding: 4px 10px; background: rgba(255,101,132,0.1); color: var(--red);
+    border: 1px solid rgba(255,101,132,0.2); border-radius: 6px; font-size: 12px;
+    cursor: pointer; font-family: var(--mono); transition: all 0.2s;
+  }
+  .btn-del:hover { background: rgba(255,101,132,0.2); }
+
+  /* Progress bar */
+  .progress-bar-wrap { background: var(--surface2); border-radius: 6px; height: 8px; margin-top: 8px; }
+  .progress-bar { height: 100%; border-radius: 6px; transition: width 0.4s; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
+
+  /* Two-col layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 20px 16px; }
+    .two-col { grid-template-columns: 1fr; }
+    .hamburger { display: flex !important; }
+  }
+  .hamburger {
+    display: none; position: fixed; top: 16px; left: 16px; z-index: 200;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px; cursor: pointer; flex-direction: column; gap: 4px;
+  }
+  .hamburger span { display: block; width: 20px; height: 2px; background: var(--text); border-radius: 2px; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+  .overlay.open { display: block; }
+
+  /* Charts */
+  .chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .chart-bar-label { font-size: 12px; color: var(--muted); width: 140px; flex-shrink: 0; font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chart-bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 10px; }
+  .chart-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .chart-bar-val { font-size: 12px; color: var(--text); font-family: var(--mono); width: 80px; text-align: right; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">💰 FinanceiroApp</div>
+    <div class="login-title">Bem-vindo de volta</div>
+    <div class="login-sub">Acesse seu painel financeiro pessoal</div>
+    <div class="input-group">
+      <label>USUÁRIO</label>
+      <input type="text" id="loginUser" placeholder="seu usuário" autocomplete="username">
+    </div>
+    <div class="input-group">
+      <label>SENHA</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Entrar →</button>
+    <div class="login-error" id="loginErr">Usuário ou senha incorretos.</div>
+  </div>
+</div>
+
+<!-- Hamburger Mobile -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- App -->
+<div id="app">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      💰 finance
+      <span>Meu Financeiro</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" onclick="showPage('dashboard', this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" onclick="showPage('gastosMes', this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Gastos do Mês
+      </button>
+      <button class="nav-item" onclick="showPage('parcelas', this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Parcelamentos
+      </button>
+      <button class="nav-item" onclick="showPage('fixos', this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Gastos Fixos
+      </button>
+      <button class="nav-item" onclick="showPage('entradas', this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Entradas
+      </button>
+      <button class="nav-item" onclick="showPage('configuracoes', this)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Configurações
+      </button>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="logout-btn" onclick="doLogout()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </div>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Visão geral das suas finanças</div>
+
+      <div class="month-tabs" id="dashMonthTabs"></div>
+
+      <div class="cards-grid" id="dashCards"></div>
+
+      <div class="two-col">
+        <div class="section">
+          <div class="section-title">📊 Gastos por Categoria</div>
+          <div id="catChart"></div>
+        </div>
+        <div class="section">
+          <div class="section-title">📈 Resumo do Mês</div>
+          <div id="dashSummary"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GASTOS DO MÊS -->
+    <div class="page" id="page-gastosMes">
+      <div class="page-title">Gastos do Mês no Crédito</div>
+      <div class="page-sub">Lançamentos de crédito por mês</div>
+      <div class="month-tabs" id="gastosMonthTabs"></div>
+
+      <div class="section">
+        <div class="section-title">➕ Novo Gasto</div>
+        <div class="form-grid">
+          <div class="form-group"><label>DESCRIÇÃO</label><input type="text" id="gNome" placeholder="Ex: Supermercado"></div>
+          <div class="form-group"><label>DATA</label><input type="date" id="gData"></div>
+          <div class="form-group"><label>CATEGORIA</label>
+            <select id="gCat">
+              <option>Alimentação</option><option>Transporte</option><option>Lazer</option>
+              <option>Saúde</option><option>Educação</option><option>Assinaturas e Serviços</option>
+              <option>Gastos da Mãe</option><option>Dívidas e empréstimos</option>
+              <option>Mecânicas e peças automotivas</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group"><label>VALOR (R$)</label><input type="number" id="gValor" placeholder="0,00" step="0.01"></div>
+          <div class="form-group"><label>MÊS REFERÊNCIA</label>
+            <select id="gMes">
+              <option value="ABRIL">Abril</option><option value="MAIO">Maio</option>
+              <option value="JUNHO">Junho</option><option value="JULHO">Julho</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addGasto()">+ Adicionar Gasto</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🧾 Lançamentos</div>
+        <div class="table-wrap"><table id="gastosTable">
+          <thead><tr><th>DESCRIÇÃO</th><th>DATA</th><th>CATEGORIA</th><th>VALOR</th><th></th></tr></thead>
+          <tbody id="gastosBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- PARCELAMENTOS -->
+    <div class="page" id="page-parcelas">
+      <div class="page-title">Parcelamentos no Cartão</div>
+      <div class="page-sub">Controle de parcelamentos ativos e futuros</div>
+      <div class="month-tabs" id="parcelasMonthTabs"></div>
+
+      <div class="section">
+        <div class="section-title">➕ Novo Parcelamento</div>
+        <div class="form-grid">
+          <div class="form-group"><label>DESCRIÇÃO</label><input type="text" id="pNome" placeholder="Ex: iPhone 16"></div>
+          <div class="form-group"><label>DATA 1ª PARCELA</label><input type="date" id="pData"></div>
+          <div class="form-group"><label>CATEGORIA</label>
+            <select id="pCat">
+              <option>Lazer</option><option>Transporte</option><option>Alimentação</option>
+              <option>Saúde</option><option>Educação</option><option>Assinaturas e Serviços</option>
+              <option>Gastos da Mãe</option><option>Mecânicas e peças automotivas</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group"><label>CARTÃO</label>
+            <select id="pCartao"><option>Nubank</option><option>Sicredi</option><option>MP</option><option>Outro</option></select>
+          </div>
+          <div class="form-group"><label>VALOR DA PARCELA (R$)</label><input type="number" id="pValorParcela" placeholder="0,00" step="0.01"></div>
+          <div class="form-group"><label>TOTAL DE PARCELAS</label><input type="number" id="pTotal" placeholder="12" min="1"></div>
+        </div>
+        <button class="btn-add" onclick="addParcela()">+ Adicionar Parcelamento</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">💳 Parcelamentos por Mês</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>DESCRIÇÃO</th><th>PARCELA</th><th>DATA INÍCIO</th><th>CATEGORIA</th><th>CARTÃO</th><th>VALOR PARCELA</th><th>TOTAL RESTANTE</th><th></th></tr></thead>
+          <tbody id="parcelasBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- FIXOS -->
+    <div class="page" id="page-fixos">
+      <div class="page-title">Gastos Fixos Mensais</div>
+      <div class="page-sub">Despesas recorrentes todo mês</div>
+
+      <div class="section">
+        <div class="section-title">➕ Novo Gasto Fixo</div>
+        <div class="form-grid">
+          <div class="form-group"><label>DESCRIÇÃO</label><input type="text" id="fNome" placeholder="Ex: Netflix"></div>
+          <div class="form-group"><label>TIPO PAGAMENTO</label>
+            <select id="fTipo"><option>PIX</option><option>Débito</option><option>Crédito</option><option>Boleto</option></select>
+          </div>
+          <div class="form-group"><label>CATEGORIA</label>
+            <select id="fCat">
+              <option>Assinaturas e Serviços</option><option>Saúde</option><option>Educação</option>
+              <option>Transporte</option><option>Moradia</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group"><label>VALOR (R$)</label><input type="number" id="fValor" placeholder="0,00" step="0.01"></div>
+        </div>
+        <button class="btn-add" onclick="addFixo()">+ Adicionar Fixo</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🏠 Lista de Fixos</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>DESCRIÇÃO</th><th>TIPO</th><th>CATEGORIA</th><th>VALOR/MÊS</th><th></th></tr></thead>
+          <tbody id="fixosBody"></tbody>
+        </table></div>
+        <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);">
+            <span>Total mensal fixos:</span>
+            <span id="fixosTotal" style="color:var(--text);font-family:var(--mono);font-weight:700;"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTRADAS -->
+    <div class="page" id="page-entradas">
+      <div class="page-title">Entradas</div>
+      <div class="page-sub">Receitas e entradas mensais</div>
+      <div class="month-tabs" id="entradasMonthTabs"></div>
+
+      <div class="section">
+        <div class="section-title">➕ Nova Entrada</div>
+        <div class="form-grid">
+          <div class="form-group"><label>DESCRIÇÃO</label><input type="text" id="eNome" placeholder="Ex: Salário"></div>
+          <div class="form-group"><label>DATA</label><input type="date" id="eData"></div>
+          <div class="form-group"><label>VALOR (R$)</label><input type="number" id="eValor" placeholder="0,00" step="0.01"></div>
+          <div class="form-group"><label>MÊS REFERÊNCIA</label>
+            <select id="eMes">
+              <option value="ABRIL">Abril</option><option value="MAIO">Maio</option>
+              <option value="JUNHO">Junho</option><option value="JULHO">Julho</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addEntrada()">+ Adicionar Entrada</button>
+      </div>
+
+      <div class="section">
+        <div class="section-title">💚 Receitas</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>DESCRIÇÃO</th><th>DATA</th><th>MÊS</th><th>VALOR</th><th></th></tr></thead>
+          <tbody id="entradasBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- CONFIGURAÇÕES -->
+    <div class="page" id="page-configuracoes">
+      <div class="page-title">Configurações</div>
+      <div class="page-sub">Gerenciar conta e dados</div>
+
+      <div class="section" style="max-width:420px;">
+        <div class="section-title">🔑 Alterar Senha</div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>SENHA ATUAL</label><input type="password" id="senhaAtual" placeholder="••••••••">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>NOVA SENHA</label><input type="password" id="senhaNova" placeholder="••••••••">
+        </div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label>CONFIRMAR NOVA SENHA</label><input type="password" id="senhaConf" placeholder="••••••••">
+        </div>
+        <button class="btn-add" onclick="alterarSenha()">Salvar Senha</button>
+        <div id="senhaMsg" style="margin-top:10px;font-size:13px;display:none;"></div>
+      </div>
+
+      <div class="section" style="max-width:420px;margin-top:20px;">
+        <div class="section-title">🗄️ Dados</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Os dados são salvos localmente no seu navegador (localStorage). Para manter entre dispositivos, exporte e importe o JSON.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-add" onclick="exportData()">⬇ Exportar JSON</button>
+          <button class="btn-add" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);" onclick="document.getElementById('importFile').click()">⬆ Importar JSON</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// =================== DATA ===================
+
+const MONTHS = ['ABRIL','MAIO','JUNHO','JULHO'];
+const MONTH_LABELS = { ABRIL:'Abril', MAIO:'Maio', JUNHO:'Junho', JULHO:'Julho' };
+
+// Dados iniciais importados da planilha
+const INITIAL_DATA = {
+  credentials: { user: 'admin', pass: 'financeiro2026' },
+  currentMonth: 'ABRIL',
+  fixos: [
+    { id: 1, nome: 'TIM', tipo: 'PIX', categoria: 'Assinaturas e Serviços', valor: 75 },
+    { id: 2, nome: 'Academia', tipo: 'Débito', categoria: 'Saúde', valor: 120 },
+    { id: 3, nome: 'Faculdade', tipo: 'Débito', categoria: 'Educação', valor: 1750 },
+    { id: 4, nome: 'Toyota Etios', tipo: 'PIX', categoria: 'Transporte', valor: 1000 },
+    { id: 5, nome: 'AppleCare+', tipo: 'PIX', categoria: 'Assinaturas e Serviços', valor: 50 },
+  ],
+  parcelas: [
+    { id: 1, nome: 'Apple Watch da Sofia', dataInicio: '2025-10-04', categoria: 'Lazer', cartao: 'Nubank', valorParcela: 143.44, totalParcelas: 10, parcelaAtual: 8 },
+    { id: 2, nome: 'Nissei: remédios da mãe', dataInicio: '2026-01-13', categoria: 'Gastos da Mãe', cartao: 'Nubank', valorParcela: 52.16, totalParcelas: 3, parcelaAtual: 3 },
+    { id: 3, nome: 'Monitor do Breno', dataInicio: '2026-02-08', categoria: 'Gastos da Mãe', cartao: 'MP', valorParcela: 44.54, totalParcelas: 18, parcelaAtual: 2 },
+    { id: 4, nome: 'Tênis', dataInicio: '2026-02-10', categoria: 'Lazer', cartao: 'MP', valorParcela: 23.68, totalParcelas: 8, parcelaAtual: 2 },
+    { id: 5, nome: 'Baú GIVI', dataInicio: '2026-04-08', categoria: 'Transporte', cartao: 'MP', valorParcela: 52.01, totalParcelas: 8, parcelaAtual: 1 },
+    { id: 6, nome: 'Sahara (Nubank)', dataInicio: '2026-03-14', categoria: 'Transporte', cartao: 'Nubank', valorParcela: 833.33, totalParcelas: 12, parcelaAtual: 1 },
+    { id: 7, nome: 'Sahara (Sicredi)', dataInicio: '2026-03-14', categoria: 'Transporte', cartao: 'Sicredi', valorParcela: 1208.30, totalParcelas: 12, parcelaAtual: 1 },
+    { id: 8, nome: "Resident's Evil", dataInicio: '2026-03-21', categoria: 'Lazer', cartao: 'Nubank', valorParcela: 44.18, totalParcelas: 4, parcelaAtual: 1 },
+  ],
+  gastos: {
+    ABRIL: [
+      { id: 1, nome: 'Cantina da UNIMEO', data: '2026-03-04', categoria: 'Alimentação', valor: 24 },
+      { id: 2, nome: 'RecargaPay: Fatura anterior', data: '2026-03-05', categoria: 'Dívidas e empréstimos', valor: 312.78 },
+      { id: 3, nome: 'Spotify', data: '2026-03-06', categoria: 'Gastos da Mãe', valor: 31.9 },
+      { id: 4, nome: 'Posto Imperial', data: '2026-03-07', categoria: 'Transporte', valor: 100 },
+      { id: 5, nome: 'Zero Hora', data: '2026-03-07', categoria: 'Lazer', valor: 9 },
+      { id: 6, nome: 'Película do painel da Sahara', data: '2026-03-08', categoria: 'Mecânicas e peças automotivas', valor: 58.54 },
+      { id: 7, nome: 'Pra pagar Sicredi.', data: '2026-03-09', categoria: 'Dívidas e empréstimos', valor: 27.18 },
+      { id: 8, nome: 'Cantina da UNIMEO', data: '2026-03-09', categoria: 'Alimentação', valor: 40 },
+      { id: 9, nome: 'Amazon Music da vó', data: '2026-03-11', categoria: 'Lazer', valor: 25.9 },
+      { id: 10, nome: 'Apple iCloud', data: '2026-03-14', categoria: 'Assinaturas e Serviços', valor: 19.9 },
+      { id: 11, nome: 'Sorriso Gelado', data: '2026-03-14', categoria: 'Alimentação', valor: 32 },
+      { id: 12, nome: 'Mercado Pedroso', data: '2026-03-16', categoria: 'Alimentação', valor: 54.99 },
+      { id: 13, nome: 'Eleven', data: '2026-03-17', categoria: 'Alimentação', valor: 12 },
+      { id: 14, nome: 'Posto Dubai', data: '2026-03-21', categoria: 'Transporte', valor: 13 },
+      { id: 15, nome: 'Mercado Pedroso', data: '2026-03-21', categoria: 'Alimentação', valor: 28.8 },
+      { id: 16, nome: 'PS Plus', data: '2026-03-21', categoria: 'Lazer', valor: 68.21 },
+      { id: 17, nome: 'A Tapioca', data: '2026-03-21', categoria: 'Alimentação', valor: 31.99 },
+      { id: 18, nome: 'Freeway: Pizza', data: '2026-03-21', categoria: 'Alimentação', valor: 48 },
+    ],
+    MAIO: [], JUNHO: [], JULHO: []
+  },
+  entradas: {
+    ABRIL: [
+      { id: 1, nome: 'Salário', data: '2026-04-01', valor: 4400 },
+      { id: 2, nome: 'Aux. Mãe', data: '2026-04-01', valor: 300 },
+      { id: 3, nome: 'Gastos da mãe', data: '2026-04-01', valor: 128.60 },
+      { id: 4, nome: 'Ticket para pag. Etios', data: '2026-04-01', valor: 483.40 },
+    ],
+    MAIO: [
+      { id: 1, nome: 'Salário', data: '2026-05-01', valor: 4400 },
+      { id: 2, nome: 'Aux. Mãe', data: '2026-05-01', valor: 300 },
+      { id: 3, nome: 'Ticket para pag. Etios', data: '2026-05-01', valor: 483.40 },
+    ],
+    JUNHO: [
+      { id: 1, nome: 'Salário', data: '2026-06-01', valor: 4400 },
+      { id: 2, nome: 'Aux. Mãe', data: '2026-06-01', valor: 300 },
+      { id: 3, nome: 'Ticket para pag. Etios', data: '2026-06-01', valor: 483.40 },
+    ],
+    JULHO: [
+      { id: 1, nome: 'Salário', data: '2026-07-01', valor: 4400 },
+      { id: 2, nome: 'Aux. Mãe', data: '2026-07-01', valor: 300 },
+      { id: 3, nome: 'Ticket para pag. Etios', data: '2026-07-01', valor: 483.40 },
+    ],
+  }
+};
+
+// =================== STATE ===================
+let state = {};
+
+function loadState() {
+  const saved = localStorage.getItem('financeiroApp');
+  if (saved) {
+    state = JSON.parse(saved);
+  } else {
+    state = JSON.parse(JSON.stringify(INITIAL_DATA));
+    saveState();
+  }
+}
+
+function saveState() {
+  localStorage.setItem('financeiroApp', JSON.stringify(state));
+}
+
+let selectedMonth = 'ABRIL';
+
+// =================== AUTH ===================
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (u === state.credentials.user && p === state.credentials.pass) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    init();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+function alterarSenha() {
+  const atual = document.getElementById('senhaAtual').value;
+  const nova = document.getElementById('senhaNova').value;
+  const conf = document.getElementById('senhaConf').value;
+  const msg = document.getElementById('senhaMsg');
+  if (atual !== state.credentials.pass) {
+    msg.style.display = 'block'; msg.style.color = 'var(--red)'; msg.textContent = 'Senha atual incorreta.'; return;
+  }
+  if (nova !== conf) {
+    msg.style.display = 'block'; msg.style.color = 'var(--red)'; msg.textContent = 'Senhas não coincidem.'; return;
+  }
+  if (nova.length < 4) {
+    msg.style.display = 'block'; msg.style.color = 'var(--red)'; msg.textContent = 'Mínimo 4 caracteres.'; return;
+  }
+  state.credentials.pass = nova;
+  saveState();
+  msg.style.display = 'block'; msg.style.color = 'var(--green)'; msg.textContent = 'Senha alterada com sucesso!';
+  setTimeout(() => { msg.style.display = 'none'; }, 2500);
+}
+
+// =================== NAVIGATION ===================
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  if (btn) btn.classList.add('active');
+  closeSidebar();
+  renderPage(page);
+}
+
+function renderPage(page) {
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'gastosMes') renderGastosMes();
+  if (page === 'parcelas') renderParcelas();
+  if (page === 'fixos') renderFixos();
+  if (page === 'entradas') renderEntradas();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// =================== MONTH TABS ===================
+function buildMonthTabs(containerId, onChange) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  MONTHS.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'month-tab' + (m === selectedMonth ? ' active' : '');
+    btn.textContent = MONTH_LABELS[m];
+    btn.onclick = () => {
+      selectedMonth = m;
+      document.querySelectorAll('#' + containerId + ' .month-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      onChange(m);
+    };
+    el.appendChild(btn);
+  });
+}
+
+// =================== UTILS ===================
+function fmt(v) { return 'R$ ' + parseFloat(v||0).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function fmtDate(s) { if (!s) return '—'; const d = new Date(s+'T12:00:00'); return d.toLocaleDateString('pt-BR'); }
+const CAT_COLORS = {
+  'Alimentação':'#43e97b','Transporte':'#6c63ff','Lazer':'#f7c948',
+  'Saúde':'#60a5fa','Educação':'#a78bfa','Assinaturas e Serviços':'#f472b6',
+  'Gastos da Mãe':'#fb923c','Dívidas e empréstimos':'#f87171',
+  'Mecânicas e peças automotivas':'#34d399','Outros':'#9ca3af'
+};
+function catBadge(cat) {
+  const c = CAT_COLORS[cat] || '#9ca3af';
+  return `<span class="badge" style="background:${c}22;color:${c}">${cat}</span>`;
+}
+function uid() { return Date.now() + Math.random(); }
+
+// =================== DASHBOARD ===================
+function renderDashboard() {
+  buildMonthTabs('dashMonthTabs', () => renderDashboard());
+  const m = selectedMonth;
+  const gastos = state.gastos[m] || [];
+  const entradas = state.entradas[m] || [];
+  const fixos = state.fixos || [];
+
+  const totalGastos = gastos.reduce((s, g) => s + parseFloat(g.valor||0), 0);
+  const totalEntradas = entradas.reduce((s, e) => s + parseFloat(e.valor||0), 0);
+  const totalFixos = fixos.reduce((s, f) => s + parseFloat(f.valor||0), 0);
+
+  // Parcelas do mês
+  const monthIdx = MONTHS.indexOf(m);
+  let totalParcelas = 0;
+  (state.parcelas||[]).forEach(p => {
+    const abrilIdx = 0;
+    const diff = monthIdx - abrilIdx;
+    const parcAtual = p.parcelaAtual + diff;
+    if (parcAtual <= p.totalParcelas) totalParcelas += parseFloat(p.valorParcela||0);
+  });
+
+  const totalSaidas = totalFixos + totalParcelas + totalGastos;
+  const saldo = totalEntradas - totalSaidas;
+
+  document.getElementById('dashCards').innerHTML = `
+    <div class="card"><div class="card-label">Entradas</div><div class="card-value green">${fmt(totalEntradas)}</div></div>
+    <div class="card"><div class="card-label">Fixos</div><div class="card-value purple">${fmt(totalFixos)}</div></div>
+    <div class="card"><div class="card-label">Parcelas</div><div class="card-value yellow">${fmt(totalParcelas)}</div></div>
+    <div class="card"><div class="card-label">Gastos Crédito</div><div class="card-value red">${fmt(totalGastos)}</div></div>
+    <div class="card"><div class="card-label">Saldo Final</div><div class="card-value ${saldo >= 0 ? 'green' : 'red'}">${fmt(saldo)}</div></div>
+  `;
+
+  // Category chart
+  const catMap = {};
+  gastos.forEach(g => { catMap[g.categoria] = (catMap[g.categoria]||0) + parseFloat(g.valor||0); });
+  const sorted = Object.entries(catMap).sort((a,b) => b[1]-a[1]);
+  const maxVal = sorted[0]?.[1] || 1;
+  let chartHtml = '';
+  sorted.forEach(([cat, val]) => {
+    const pct = (val/maxVal*100).toFixed(1);
+    const color = CAT_COLORS[cat] || '#9ca3af';
+    chartHtml += `<div class="chart-bar-row">
+      <div class="chart-bar-label">${cat}</div>
+      <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="chart-bar-val">${fmt(val)}</div>
+    </div>`;
+  });
+  if (!chartHtml) chartHtml = '<div class="empty">Sem gastos neste mês</div>';
+  document.getElementById('catChart').innerHTML = chartHtml;
+
+  // Summary
+  document.getElementById('dashSummary').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:var(--muted);font-size:13px;">Total de entradas</span>
+        <span style="color:var(--green);font-family:var(--mono);font-weight:700;">${fmt(totalEntradas)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:var(--muted);font-size:13px;">Gastos fixos</span>
+        <span style="color:var(--accent);font-family:var(--mono);">- ${fmt(totalFixos)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:var(--muted);font-size:13px;">Parcelas cartão</span>
+        <span style="color:var(--yellow);font-family:var(--mono);">- ${fmt(totalParcelas)}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:var(--muted);font-size:13px;">Gastos crédito</span>
+        <span style="color:var(--red);font-family:var(--mono);">- ${fmt(totalGastos)}</span>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:14px;font-weight:700;">Saldo final</span>
+        <span style="font-family:var(--mono);font-size:20px;font-weight:700;color:${saldo>=0?'var(--green)':'var(--red)'};">${fmt(saldo)}</span>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;">
+          <span>Comprometido</span>
+          <span>${Math.min(100,(totalSaidas/totalEntradas*100)).toFixed(0)}%</span>
+        </div>
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:${Math.min(100,(totalSaidas/totalEntradas*100)).toFixed(0)}%;background:${saldo>=0?'var(--green)':'var(--red)'}"></div></div>
+      </div>
+    </div>
+  `;
+}
+
+// =================== GASTOS MÊS ===================
+function renderGastosMes() {
+  buildMonthTabs('gastosMonthTabs', () => renderGastosMes());
+  const gastos = state.gastos[selectedMonth] || [];
+  const tbody = document.getElementById('gastosBody');
+  if (!gastos.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty">Nenhum gasto lançado neste mês.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = gastos.map(g => `
+    <tr>
+      <td><strong>${g.nome}</strong></td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmtDate(g.data)}</td>
+      <td>${catBadge(g.categoria)}</td>
+      <td style="font-family:var(--mono);color:var(--red)">${fmt(g.valor)}</td>
+      <td><button class="btn-del" onclick="delGasto(${g.id})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function addGasto() {
+  const nome = document.getElementById('gNome').value.trim();
+  const data = document.getElementById('gData').value;
+  const cat = document.getElementById('gCat').value;
+  const valor = parseFloat(document.getElementById('gValor').value);
+  const mes = document.getElementById('gMes').value;
+  if (!nome || !data || !valor) return alert('Preencha todos os campos!');
+  if (!state.gastos[mes]) state.gastos[mes] = [];
+  state.gastos[mes].push({ id: uid(), nome, data, categoria: cat, valor });
+  saveState();
+  document.getElementById('gNome').value = '';
+  document.getElementById('gData').value = '';
+  document.getElementById('gValor').value = '';
+  selectedMonth = mes;
+  renderGastosMes();
+}
+
+function delGasto(id) {
+  if (!confirm('Remover este gasto?')) return;
+  state.gastos[selectedMonth] = state.gastos[selectedMonth].filter(g => g.id !== id);
+  saveState(); renderGastosMes();
+}
+
+// =================== PARCELAS ===================
+function renderParcelas() {
+  buildMonthTabs('parcelasMonthTabs', () => renderParcelas());
+  const monthIdx = MONTHS.indexOf(selectedMonth);
+  const parcelas = state.parcelas || [];
+  const tbody = document.getElementById('parcelasBody');
+
+  const visibles = parcelas.map(p => {
+    const diff = monthIdx;
+    const parcAtual = parseInt(p.parcelaAtual) + diff;
+    return { ...p, parcAtual };
+  }).filter(p => p.parcAtual <= p.totalParcelas);
+
+  if (!visibles.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty">Nenhuma parcela ativa neste mês.</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = visibles.map(p => {
+    const restante = (p.totalParcelas - p.parcAtual + 1) * parseFloat(p.valorParcela);
+    return `<tr>
+      <td><strong>${p.nome}</strong></td>
+      <td><span class="badge badge-purple">${p.parcAtual}/${p.totalParcelas}</span></td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmtDate(p.dataInicio)}</td>
+      <td>${catBadge(p.categoria)}</td>
+      <td><span class="badge badge-blue">${p.cartao}</span></td>
+      <td style="font-family:var(--mono);color:var(--yellow)">${fmt(p.valorParcela)}</td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmt(restante)}</td>
+      <td><button class="btn-del" onclick="delParcela(${p.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function addParcela() {
+  const nome = document.getElementById('pNome').value.trim();
+  const data = document.getElementById('pData').value;
+  const cat = document.getElementById('pCat').value;
+  const cartao = document.getElementById('pCartao').value;
+  const valorParcela = parseFloat(document.getElementById('pValorParcela').value);
+  const totalParcelas = parseInt(document.getElementById('pTotal').value);
+  if (!nome || !data || !valorParcela || !totalParcelas) return alert('Preencha todos os campos!');
+  if (!state.parcelas) state.parcelas = [];
+  state.parcelas.push({ id: uid(), nome, dataInicio: data, categoria: cat, cartao, valorParcela, totalParcelas, parcelaAtual: 1 });
+  saveState();
+  document.getElementById('pNome').value = '';
+  document.getElementById('pData').value = '';
+  document.getElementById('pValorParcela').value = '';
+  document.getElementById('pTotal').value = '';
+  renderParcelas();
+}
+
+function delParcela(id) {
+  if (!confirm('Remover este parcelamento?')) return;
+  state.parcelas = state.parcelas.filter(p => p.id !== id);
+  saveState(); renderParcelas();
+}
+
+// =================== FIXOS ===================
+function renderFixos() {
+  const fixos = state.fixos || [];
+  const tbody = document.getElementById('fixosBody');
+  const total = fixos.reduce((s, f) => s + parseFloat(f.valor||0), 0);
+  document.getElementById('fixosTotal').textContent = fmt(total);
+
+  if (!fixos.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty">Nenhum gasto fixo cadastrado.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = fixos.map(f => `
+    <tr>
+      <td><strong>${f.nome}</strong></td>
+      <td><span class="badge badge-gray">${f.tipo}</span></td>
+      <td>${catBadge(f.categoria)}</td>
+      <td style="font-family:var(--mono);color:var(--accent)">${fmt(f.valor)}</td>
+      <td><button class="btn-del" onclick="delFixo(${f.id})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function addFixo() {
+  const nome = document.getElementById('fNome').value.trim();
+  const tipo = document.getElementById('fTipo').value;
+  const cat = document.getElementById('fCat').value;
+  const valor = parseFloat(document.getElementById('fValor').value);
+  if (!nome || !valor) return alert('Preencha nome e valor!');
+  if (!state.fixos) state.fixos = [];
+  state.fixos.push({ id: uid(), nome, tipo, categoria: cat, valor });
+  saveState();
+  document.getElementById('fNome').value = '';
+  document.getElementById('fValor').value = '';
+  renderFixos();
+}
+
+function delFixo(id) {
+  if (!confirm('Remover este fixo?')) return;
+  state.fixos = state.fixos.filter(f => f.id !== id);
+  saveState(); renderFixos();
+}
+
+// =================== ENTRADAS ===================
+function renderEntradas() {
+  buildMonthTabs('entradasMonthTabs', () => renderEntradas());
+  const entradas = state.entradas[selectedMonth] || [];
+  const tbody = document.getElementById('entradasBody');
+  if (!entradas.length) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty">Nenhuma entrada registrada.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = entradas.map(e => `
+    <tr>
+      <td><strong>${e.nome}</strong></td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmtDate(e.data)}</td>
+      <td><span class="badge badge-purple">${MONTH_LABELS[selectedMonth]}</span></td>
+      <td style="font-family:var(--mono);color:var(--green)">${fmt(e.valor)}</td>
+      <td><button class="btn-del" onclick="delEntrada(${e.id})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function addEntrada() {
+  const nome = document.getElementById('eNome').value.trim();
+  const data = document.getElementById('eData').value;
+  const valor = parseFloat(document.getElementById('eValor').value);
+  const mes = document.getElementById('eMes').value;
+  if (!nome || !data || !valor) return alert('Preencha todos os campos!');
+  if (!state.entradas[mes]) state.entradas[mes] = [];
+  state.entradas[mes].push({ id: uid(), nome, data, valor });
+  saveState();
+  document.getElementById('eNome').value = '';
+  document.getElementById('eData').value = '';
+  document.getElementById('eValor').value = '';
+  selectedMonth = mes;
+  renderEntradas();
+}
+
+function delEntrada(id) {
+  if (!confirm('Remover esta entrada?')) return;
+  state.entradas[selectedMonth] = state.entradas[selectedMonth].filter(e => e.id !== id);
+  saveState(); renderEntradas();
+}
+
+// =================== EXPORT / IMPORT ===================
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'financeiro_backup.json';
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      state = data;
+      saveState();
+      alert('Dados importados com sucesso!');
+      renderPage('configuracoes');
+    } catch { alert('Arquivo inválido!'); }
+  };
+  reader.readAsText(file);
+}
+
+// =================== INIT ===================
+function init() {
+  selectedMonth = 'ABRIL';
+  renderDashboard();
+}
+
+loadState();
+
+// Set today's date as default
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('gData').value = today;
+document.getElementById('pData').value = today;
+document.getElementById('eData').value = today;
+</script>
+</body>
+</html>
