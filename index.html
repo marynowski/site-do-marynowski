@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guilherme Finanças</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080d14;
+  --surface: #0e1520;
+  --surface2: #162030;
+  --border: #1e3048;
+  --accent: #38bdf8;
+  --accent-dim: rgba(56,189,248,0.12);
+  --accent-glow: rgba(56,189,248,0.25);
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --text: #e2eaf4;
+  --muted: #4d6a85;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Sora', sans-serif;
+  --radius: 14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+
+/* ── LOGIN ── */
+#loginPage{
+  display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:radial-gradient(ellipse at 30% 40%,rgba(56,189,248,0.07) 0%,transparent 60%),var(--bg);
+}
+.login-box{
+  width:360px;background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:40px 36px;box-shadow:0 0 60px rgba(56,189,248,0.08);
+}
+.login-brand{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;}
+.login-title{font-size:26px;font-weight:800;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.inp-grp{margin-bottom:14px;}
+.inp-grp label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-family:var(--mono);letter-spacing:.5px;}
+.inp-grp input{
+  width:100%;padding:11px 13px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:9px;color:var(--text);
+  font-size:14px;font-family:var(--sans);outline:none;transition:border-color .2s;
+}
+.inp-grp input:focus{border-color:var(--accent);}
+.btn-main{
+  width:100%;padding:12px;background:var(--accent);color:#050d18;
+  border:none;border-radius:9px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:var(--sans);margin-top:6px;transition:opacity .2s,transform .1s;
+}
+.btn-main:hover{opacity:.9;transform:translateY(-1px);}
+.login-err{color:var(--red);font-size:12px;margin-top:8px;display:none;}
+.token-hint{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6;}
+.token-hint a{color:var(--accent);text-decoration:none;}
+
+/* ── SIDEBAR ── */
+#app{display:none;flex-direction:row;min-height:100vh;}
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:224px;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;padding:0;
+}
+.sb-logo{
+  padding:22px 20px 18px;border-bottom:1px solid var(--border);
+}
+.sb-logo-tag{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;}
+.sb-logo-name{font-size:17px;font-weight:800;margin-top:3px;line-height:1.2;}
+.sb-logo-name span{color:var(--accent);}
+.nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.ni{
+  display:flex;align-items:center;gap:9px;padding:9px 11px;
+  border-radius:9px;cursor:pointer;font-size:13px;color:var(--muted);
+  transition:all .15s;border:none;background:transparent;width:100%;
+  text-align:left;font-family:var(--sans);
+}
+.ni:hover{background:var(--surface2);color:var(--text);}
+.ni.active{background:var(--accent-dim);color:var(--accent);font-weight:600;}
+.ni svg{flex-shrink:0;width:15px;height:15px;}
+.sb-bottom{padding:10px;border-top:1px solid var(--border);}
+.logout-btn{
+  display:flex;align-items:center;gap:9px;width:100%;
+  padding:9px 11px;border-radius:9px;cursor:pointer;
+  font-size:13px;color:var(--muted);background:transparent;
+  border:none;font-family:var(--sans);transition:all .15s;
+}
+.logout-btn:hover{background:rgba(248,113,113,.08);color:var(--red);}
+
+/* ── SYNC STATUS ── */
+.sync-status{
+  padding:6px 10px;margin:0 10px 6px;border-radius:8px;
+  font-size:11px;font-family:var(--mono);text-align:center;
+  display:none;
+}
+.sync-ok{background:rgba(52,211,153,.1);color:var(--green);display:block;}
+.sync-err{background:rgba(248,113,113,.1);color:var(--red);display:block;}
+.sync-ing{background:rgba(56,189,248,.1);color:var(--accent);display:block;}
+
+/* ── MAIN ── */
+.main{margin-left:224px;padding:28px 32px;flex:1;min-width:0;}
+.page{display:none;}
+.page.active{display:block;}
+.page-hd{margin-bottom:24px;}
+.page-title{font-size:24px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+
+/* ── MONTH SELECTOR ── */
+.month-scroll{overflow-x:auto;padding-bottom:8px;margin-bottom:22px;}
+.month-scroll::-webkit-scrollbar{height:3px;}
+.month-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.month-tabs{display:flex;gap:6px;width:max-content;}
+.mt{
+  padding:6px 15px;border-radius:20px;font-size:12px;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-family:var(--sans);transition:all .15s;white-space:nowrap;
+}
+.mt:hover{color:var(--text);border-color:var(--accent);}
+.mt.active{background:var(--accent);color:#050d18;border-color:var(--accent);}
+.mt.has-data{border-color:rgba(56,189,248,.35);color:var(--text);}
+
+/* ── CARDS ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:13px;margin-bottom:22px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+.card-lbl{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;}
+.card-val{font-size:22px;font-weight:700;font-family:var(--mono);}
+.cv-green{color:var(--green);}
+.cv-red{color:var(--red);}
+.cv-yellow{color:var(--yellow);}
+.cv-blue{color:var(--accent);}
+
+/* ── SECTIONS ── */
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;}
+.sec-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead tr{border-bottom:1px solid var(--border);}
+th{padding:8px 12px;text-align:left;font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.5px;font-weight:500;}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.03);}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:rgba(255,255,255,.015);}
+.empty{text-align:center;padding:32px;color:var(--muted);font-size:12px;}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600;font-family:var(--mono);}
+.b-blue{background:rgba(56,189,248,.12);color:var(--accent);}
+.b-green{background:rgba(52,211,153,.12);color:var(--green);}
+.b-red{background:rgba(248,113,113,.12);color:var(--red);}
+.b-yellow{background:rgba(251,191,36,.12);color:var(--yellow);}
+.b-gray{background:rgba(77,106,133,.15);color:var(--muted);}
+
+/* ── FORMS ── */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px;margin-bottom:13px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.5px;}
+.fg input,.fg select{
+  padding:9px 11px;background:var(--surface2);border:1px solid var(--border);
+  border-radius:7px;color:var(--text);font-size:12.5px;
+  font-family:var(--sans);outline:none;transition:border-color .2s;
+}
+.fg input:focus,.fg select:focus{border-color:var(--accent);}
+.fg select option{background:var(--surface2);}
+.btn-add{
+  padding:9px 20px;background:var(--accent);color:#050d18;
+  border:none;border-radius:7px;font-size:12.5px;font-weight:700;
+  cursor:pointer;font-family:var(--sans);transition:opacity .15s;
+}
+.btn-add:hover{opacity:.85;}
+.btn-del{
+  padding:3px 9px;background:rgba(248,113,113,.08);color:var(--red);
+  border:1px solid rgba(248,113,113,.18);border-radius:5px;
+  font-size:11px;cursor:pointer;font-family:var(--mono);transition:all .15s;
+}
+.btn-del:hover{background:rgba(248,113,113,.18);}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+/* ── CHART BARS ── */
+.bar-row{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.bar-lbl{font-size:11px;color:var(--muted);width:130px;flex-shrink:0;font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;background:var(--surface2);border-radius:4px;height:8px;}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s;}
+.bar-val{font-size:11px;color:var(--text);font-family:var(--mono);width:75px;text-align:right;flex-shrink:0;}
+
+/* ── PROGRESS ── */
+.prog-wrap{background:var(--surface2);border-radius:5px;height:7px;margin-top:7px;}
+.prog-fill{height:100%;border-radius:5px;transition:width .4s;}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;padding:20px 14px;}
+  .two-col{grid-template-columns:1fr;}
+  .hamburger{display:flex!important;}
+  .cards{grid-template-columns:1fr 1fr;}
+}
+.hamburger{
+  display:none;position:fixed;top:14px;left:14px;z-index:200;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:7px;padding:7px;cursor:pointer;flex-direction:column;gap:4px;
+}
+.hamburger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99;}
+.overlay.open{display:block;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-brand">💸 guilherme finanças</div>
+    <div class="login-title">Bem-vindo de volta</div>
+    <div class="login-sub">Painel financeiro pessoal</div>
+    <div class="inp-grp"><label>USUÁRIO</label><input id="lu" type="text" placeholder="usuário" autocomplete="username"></div>
+    <div class="inp-grp"><label>SENHA</label><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="inp-grp">
+      <label>GITHUB TOKEN <span style="color:var(--muted);font-size:9px;">(para salvar dados)</span></label>
+      <input id="lt" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <div class="token-hint">Gere em: <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → marque <strong>repo</strong> → Generate</div>
+    </div>
+    <button class="btn-main" onclick="doLogin()">Entrar →</button>
+    <div class="login-err" id="lerr">Usuário ou senha incorretos.</div>
+  </div>
+</div>
+
+<button class="hamburger" id="ham" onclick="toggleSB()"><span></span><span></span><span></span></button>
+<div class="overlay" id="ovl" onclick="toggleSB()"></div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-tag">💸 pessoal</div>
+      <div class="sb-logo-name">guilherme<br><span>finanças</span></div>
+    </div>
+    <nav class="nav">
+      <button class="ni active" onclick="showPage('dashboard',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+      </button>
+      <button class="ni" onclick="showPage('gastos',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Gastos do Mês
+      </button>
+      <button class="ni" onclick="showPage('parcelas',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Parcelamentos
+      </button>
+      <button class="ni" onclick="showPage('fixos',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Gastos Fixos
+      </button>
+      <button class="ni" onclick="showPage('entradas',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Entradas
+      </button>
+      <button class="ni" onclick="showPage('config',this)">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Configurações
+      </button>
+    </nav>
+    <div id="syncStatus" class="sync-status"></div>
+    <div class="sb-bottom">
+      <button class="logout-btn" onclick="doLogout()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair
+      </button>
+    </div>
+  </div>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-hd"><div class="page-title">Dashboard</div><div class="page-sub">Visão geral das suas finanças</div></div>
+      <div class="month-scroll"><div class="month-tabs" id="dash-tabs"></div></div>
+      <div class="cards" id="dash-cards"></div>
+      <div class="two-col">
+        <div class="sec"><div class="sec-title">📊 Gastos por Categoria</div><div id="dash-chart"></div></div>
+        <div class="sec"><div class="sec-title">📈 Resumo do Mês</div><div id="dash-summary"></div></div>
+      </div>
+    </div>
+
+    <!-- GASTOS -->
+    <div class="page" id="page-gastos">
+      <div class="page-hd"><div class="page-title">Gastos do Mês no Crédito</div><div class="page-sub">Lançamentos variáveis por mês</div></div>
+      <div class="month-scroll"><div class="month-tabs" id="gastos-tabs"></div></div>
+      <div class="sec">
+        <div class="sec-title">➕ Novo Gasto</div>
+        <div class="form-grid">
+          <div class="fg"><label>DESCRIÇÃO</label><input id="gNome" type="text" placeholder="Ex: Supermercado"></div>
+          <div class="fg"><label>DATA</label><input id="gData" type="date"></div>
+          <div class="fg"><label>CATEGORIA</label>
+            <select id="gCat">
+              <option>Alimentação</option><option>Transporte</option><option>Lazer</option>
+              <option>Saúde</option><option>Educação</option><option>Assinaturas e Serviços</option>
+              <option>Gastos da Mãe</option><option>Dívidas e empréstimos</option>
+              <option>Mecânicas e peças automotivas</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="fg"><label>VALOR (R$)</label><input id="gValor" type="number" placeholder="0.00" step="0.01"></div>
+        </div>
+        <button class="btn-add" onclick="addGasto()">+ Adicionar</button>
+      </div>
+      <div class="sec">
+        <div class="sec-title">🧾 Lançamentos — <span id="gastos-mes-label" style="color:var(--accent)"></span></div>
+        <div class="tbl-wrap"><table><thead><tr><th>DESCRIÇÃO</th><th>DATA</th><th>CATEGORIA</th><th>VALOR</th><th></th></tr></thead><tbody id="gastos-body"></tbody></table></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;">
+          <span style="color:var(--muted)">Total do mês:</span>
+          <span id="gastos-total" style="font-family:var(--mono);font-weight:700;color:var(--red)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARCELAS -->
+    <div class="page" id="page-parcelas">
+      <div class="page-hd"><div class="page-title">Parcelamentos no Cartão</div><div class="page-sub">Meses gerados automaticamente conforme seus parcelamentos</div></div>
+      <div class="month-scroll"><div class="month-tabs" id="parcelas-tabs"></div></div>
+      <div class="sec">
+        <div class="sec-title">➕ Novo Parcelamento</div>
+        <div class="form-grid">
+          <div class="fg"><label>DESCRIÇÃO</label><input id="pNome" type="text" placeholder="Ex: iPhone"></div>
+          <div class="fg"><label>DATA 1ª PARCELA</label><input id="pData" type="date"></div>
+          <div class="fg"><label>CATEGORIA</label>
+            <select id="pCat">
+              <option>Lazer</option><option>Transporte</option><option>Alimentação</option>
+              <option>Saúde</option><option>Educação</option><option>Assinaturas e Serviços</option>
+              <option>Gastos da Mãe</option><option>Mecânicas e peças automotivas</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="fg"><label>CARTÃO</label>
+            <select id="pCartao"><option>Nubank</option><option>Sicredi</option><option>MP</option><option>Outro</option></select>
+          </div>
+          <div class="fg"><label>VALOR DA PARCELA (R$)</label><input id="pVp" type="number" placeholder="0.00" step="0.01"></div>
+          <div class="fg"><label>TOTAL DE PARCELAS</label><input id="pTot" type="number" placeholder="12" min="1"></div>
+        </div>
+        <button class="btn-add" onclick="addParcela()">+ Adicionar</button>
+      </div>
+      <div class="sec">
+        <div class="sec-title">💳 Parcelas Ativas — <span id="parc-mes-label" style="color:var(--accent)"></span></div>
+        <div class="tbl-wrap"><table><thead><tr><th>DESCRIÇÃO</th><th>PARCELA</th><th>CATEGORIA</th><th>CARTÃO</th><th>VALOR PARCELA</th><th>RESTANTE TOTAL</th><th></th></tr></thead><tbody id="parcelas-body"></tbody></table></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;">
+          <span style="color:var(--muted)">Total parcelas este mês:</span>
+          <span id="parcelas-total" style="font-family:var(--mono);font-weight:700;color:var(--yellow)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIXOS -->
+    <div class="page" id="page-fixos">
+      <div class="page-hd"><div class="page-title">Gastos Fixos Mensais</div><div class="page-sub">Despesas recorrentes — sem abas de mês, são fixas todo mês</div></div>
+      <div class="sec">
+        <div class="sec-title">➕ Novo Fixo</div>
+        <div class="form-grid">
+          <div class="fg"><label>DESCRIÇÃO</label><input id="fNome" type="text" placeholder="Ex: Netflix"></div>
+          <div class="fg"><label>TIPO PAGAMENTO</label><select id="fTipo"><option>PIX</option><option>Débito</option><option>Crédito</option><option>Boleto</option></select></div>
+          <div class="fg"><label>CATEGORIA</label>
+            <select id="fCat">
+              <option>Assinaturas e Serviços</option><option>Saúde</option><option>Educação</option>
+              <option>Transporte</option><option>Moradia</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="fg"><label>VALOR (R$)</label><input id="fValor" type="number" placeholder="0.00" step="0.01"></div>
+        </div>
+        <button class="btn-add" onclick="addFixo()">+ Adicionar</button>
+      </div>
+      <div class="sec">
+        <div class="sec-title">🏠 Lista de Fixos</div>
+        <div class="tbl-wrap"><table><thead><tr><th>DESCRIÇÃO</th><th>TIPO</th><th>CATEGORIA</th><th>VALOR/MÊS</th><th></th></tr></thead><tbody id="fixos-body"></tbody></table></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;">
+          <span style="color:var(--muted)">Total fixo mensal:</span>
+          <span id="fixos-total" style="font-family:var(--mono);font-weight:700;color:var(--accent)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENTRADAS -->
+    <div class="page" id="page-entradas">
+      <div class="page-hd"><div class="page-title">Entradas</div><div class="page-sub">Receitas por mês</div></div>
+      <div class="month-scroll"><div class="month-tabs" id="entradas-tabs"></div></div>
+      <div class="sec">
+        <div class="sec-title">➕ Nova Entrada</div>
+        <div class="form-grid">
+          <div class="fg"><label>DESCRIÇÃO</label><input id="eNome" type="text" placeholder="Ex: Salário"></div>
+          <div class="fg"><label>DATA</label><input id="eData" type="date"></div>
+          <div class="fg"><label>VALOR (R$)</label><input id="eValor" type="number" placeholder="0.00" step="0.01"></div>
+        </div>
+        <button class="btn-add" onclick="addEntrada()">+ Adicionar</button>
+      </div>
+      <div class="sec">
+        <div class="sec-title">💚 Receitas — <span id="entradas-mes-label" style="color:var(--accent)"></span></div>
+        <div class="tbl-wrap"><table><thead><tr><th>DESCRIÇÃO</th><th>DATA</th><th>VALOR</th><th></th></tr></thead><tbody id="entradas-body"></tbody></table></div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:12px;">
+          <span style="color:var(--muted)">Total entradas:</span>
+          <span id="entradas-total" style="font-family:var(--mono);font-weight:700;color:var(--green)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="page" id="page-config">
+      <div class="page-hd"><div class="page-title">Configurações</div><div class="page-sub">Conta e dados</div></div>
+      <div class="sec" style="max-width:420px;">
+        <div class="sec-title">🔑 Alterar Senha</div>
+        <div class="fg" style="margin-bottom:11px;"><label>SENHA ATUAL</label><input id="sa" type="password" placeholder="••••••••"></div>
+        <div class="fg" style="margin-bottom:11px;"><label>NOVA SENHA</label><input id="sn" type="password" placeholder="••••••••"></div>
+        <div class="fg" style="margin-bottom:14px;"><label>CONFIRMAR</label><input id="sc" type="password" placeholder="••••••••"></div>
+        <button class="btn-add" onclick="alterarSenha()">Salvar</button>
+        <div id="senha-msg" style="margin-top:9px;font-size:12px;display:none;"></div>
+      </div>
+      <div class="sec" style="max-width:420px;margin-top:14px;">
+        <div class="sec-title">🔗 GitHub Token</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Atualize seu token de acesso ao GitHub para salvar dados remotamente.</p>
+        <div class="fg" style="margin-bottom:12px;"><label>TOKEN</label><input id="tokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"></div>
+        <button class="btn-add" onclick="salvarToken()">Salvar Token</button>
+        <div id="token-msg" style="margin-top:9px;font-size:12px;display:none;"></div>
+      </div>
+      <div class="sec" style="max-width:420px;margin-top:14px;">
+        <div class="sec-title">💾 Backup Manual</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Exporte ou importe seus dados como JSON.</p>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;">
+          <button class="btn-add" onclick="exportData()">⬇ Exportar JSON</button>
+          <button class="btn-add" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);" onclick="document.getElementById('importFile').click()">⬆ Importar JSON</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  GITHUB CONFIG
+// ════════════════════════════════════════════════
+const GH_USER = 'marynowski';
+const GH_REPO = 'site-do-marynowski';
+const GH_FILE = 'dados.json';
+const GH_API  = `https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${GH_FILE}`;
+
+// ════════════════════════════════════════════════
+//  UTILS DE DATA / MÊS
+// ════════════════════════════════════════════════
+const MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MONTH_NAMES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function mkKey(year, month){ return `${year}-${String(month).padStart(2,'0')}`; }
+function keyLabel(k){ const [y,m]=k.split('-'); return `${MONTH_NAMES[+m-1]}/${y}`; }
+function keyLabelFull(k){ const [y,m]=k.split('-'); return `${MONTH_NAMES_FULL[+m-1]}/${y}`; }
+function addMonths(year, month, n){
+  let m = month - 1 + n;
+  return { year: year + Math.floor(m/12), month: (m%12)+1 };
+}
+function dateToKey(dateStr){ const d=new Date(dateStr+'T12:00:00'); return mkKey(d.getFullYear(), d.getMonth()+1); }
+function today(){ return new Date().toISOString().split('T')[0]; }
+function fmt(v){ return 'R$ '+parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtDate(s){ if(!s) return '—'; const d=new Date(s+'T12:00:00'); return d.toLocaleDateString('pt-BR'); }
+function uid(){ return Date.now()+Math.floor(Math.random()*1e6); }
+
+// ════════════════════════════════════════════════
+//  MONTH RANGE — calculado dinamicamente
+// ════════════════════════════════════════════════
+// Retorna array de chaves "YYYY-MM" cobrindo:
+// min(dataInicio de todas parcelas) até max(fim de todas parcelas)
+// + 3 meses futuros extras para novos gastos
+function computeMonthRange(state){
+  const parcelas = state.parcelas || [];
+  let minY=9999,minM=13,maxY=0,maxM=0;
+
+  parcelas.forEach(p => {
+    const d = new Date(p.dataInicio+'T12:00:00');
+    const sy = d.getFullYear(), sm = d.getMonth()+1;
+    const end = addMonths(sy, sm, p.totalParcelas - 1);
+    if(sy < minY || (sy===minY && sm<minM)){ minY=sy; minM=sm; }
+    if(end.year > maxY || (end.year===maxY && end.month>maxM)){ maxY=end.year; maxM=end.month; }
+  });
+
+  // Se não há parcelas, usar mês atual ±6
+  if(minY===9999){
+    const now=new Date(); minY=now.getFullYear(); minM=now.getMonth()+1;
+    maxY=minY; maxM=minM;
+  }
+
+  // Adiciona 3 meses extras no futuro
+  const ext = addMonths(maxY, maxM, 3);
+  maxY=ext.year; maxM=ext.month;
+
+  const keys=[];
+  let y=minY,m=minM;
+  while(y<maxY||(y===maxY&&m<=maxM)){
+    keys.push(mkKey(y,m));
+    const nx=addMonths(y,m,1); y=nx.year; m=nx.month;
+  }
+  return keys;
+}
+
+// ════════════════════════════════════════════════
+//  ESTADO INICIAL (dados da planilha)
+// ════════════════════════════════════════════════
+const INITIAL = {
+  credentials:{ user:'admin', pass:'financeiro2026' },
+  fixos:[
+    {id:1,nome:'TIM',tipo:'PIX',categoria:'Assinaturas e Serviços',valor:75},
+    {id:2,nome:'Academia',tipo:'Débito',categoria:'Saúde',valor:120},
+    {id:3,nome:'Faculdade',tipo:'Débito',categoria:'Educação',valor:1750},
+    {id:4,nome:'Toyota Etios',tipo:'PIX',categoria:'Transporte',valor:1000},
+    {id:5,nome:'AppleCare+',tipo:'PIX',categoria:'Assinaturas e Serviços',valor:50},
+  ],
+  parcelas:[
+    {id:1,nome:'Apple Watch da Sofia',dataInicio:'2025-10-01',categoria:'Lazer',cartao:'Nubank',valorParcela:143.44,totalParcelas:10},
+    {id:2,nome:'Nissei: remédios da mãe',dataInicio:'2026-01-01',categoria:'Gastos da Mãe',cartao:'Nubank',valorParcela:52.16,totalParcelas:3},
+    {id:3,nome:'Monitor do Breno',dataInicio:'2026-02-01',categoria:'Gastos da Mãe',cartao:'MP',valorParcela:44.54,totalParcelas:18},
+    {id:4,nome:'Tênis',dataInicio:'2026-02-01',categoria:'Lazer',cartao:'MP',valorParcela:23.68,totalParcelas:8},
+    {id:5,nome:'Baú GIVI',dataInicio:'2026-04-01',categoria:'Transporte',cartao:'MP',valorParcela:52.01,totalParcelas:8},
+    {id:6,nome:'Sahara (Nubank)',dataInicio:'2026-03-01',categoria:'Transporte',cartao:'Nubank',valorParcela:833.33,totalParcelas:12},
+    {id:7,nome:'Sahara (Sicredi)',dataInicio:'2026-03-01',categoria:'Transporte',cartao:'Sicredi',valorParcela:1208.30,totalParcelas:12},
+    {id:8,nome:"Resident's Evil",dataInicio:'2026-03-01',categoria:'Lazer',cartao:'Nubank',valorParcela:44.18,totalParcelas:4},
+  ],
+  // gastos e entradas são dicts "YYYY-MM": [...]
+  gastos:{
+    '2026-04':[
+      {id:1,nome:'Cantina da UNIMEO',data:'2026-03-04',categoria:'Alimentação',valor:24},
+      {id:2,nome:'RecargaPay: Fatura anterior',data:'2026-03-05',categoria:'Dívidas e empréstimos',valor:312.78},
+      {id:3,nome:'Spotify',data:'2026-03-06',categoria:'Gastos da Mãe',valor:31.9},
+      {id:4,nome:'Posto Imperial',data:'2026-03-07',categoria:'Transporte',valor:100},
+      {id:5,nome:'Zero Hora',data:'2026-03-07',categoria:'Lazer',valor:9},
+      {id:6,nome:'Película do painel da Sahara',data:'2026-03-08',categoria:'Mecânicas e peças automotivas',valor:58.54},
+      {id:7,nome:'Pra pagar Sicredi.',data:'2026-03-09',categoria:'Dívidas e empréstimos',valor:27.18},
+      {id:8,nome:'Cantina da UNIMEO',data:'2026-03-09',categoria:'Alimentação',valor:40},
+      {id:9,nome:'Amazon Music da vó',data:'2026-03-11',categoria:'Lazer',valor:25.9},
+      {id:10,nome:'Apple iCloud',data:'2026-03-14',categoria:'Assinaturas e Serviços',valor:19.9},
+      {id:11,nome:'Sorriso Gelado',data:'2026-03-14',categoria:'Alimentação',valor:32},
+      {id:12,nome:'Mercado Pedroso',data:'2026-03-16',categoria:'Alimentação',valor:54.99},
+      {id:13,nome:'Eleven',data:'2026-03-17',categoria:'Alimentação',valor:12},
+      {id:14,nome:'Posto Dubai',data:'2026-03-21',categoria:'Transporte',valor:13},
+      {id:15,nome:'Mercado Pedroso',data:'2026-03-21',categoria:'Alimentação',valor:28.8},
+      {id:16,nome:'PS Plus',data:'2026-03-21',categoria:'Lazer',valor:68.21},
+      {id:17,nome:'A Tapioca',data:'2026-03-21',categoria:'Alimentação',valor:31.99},
+      {id:18,nome:'Freeway: Pizza',data:'2026-03-21',categoria:'Alimentação',valor:48},
+    ]
+  },
+  entradas:{
+    '2026-04':[
+      {id:1,nome:'Salário',data:'2026-04-01',valor:4400},
+      {id:2,nome:'Aux. Mãe',data:'2026-04-01',valor:300},
+      {id:3,nome:'Gastos da mãe (repasse)',data:'2026-04-01',valor:128.60},
+      {id:4,nome:'Ticket para pag. Etios',data:'2026-04-01',valor:483.40},
+    ],
+    '2026-05':[
+      {id:1,nome:'Salário',data:'2026-05-01',valor:4400},
+      {id:2,nome:'Aux. Mãe',data:'2026-05-01',valor:300},
+      {id:3,nome:'Ticket para pag. Etios',data:'2026-05-01',valor:483.40},
+    ],
+    '2026-06':[
+      {id:1,nome:'Salário',data:'2026-06-01',valor:4400},
+      {id:2,nome:'Aux. Mãe',data:'2026-06-01',valor:300},
+      {id:3,nome:'Ticket para pag. Etios',data:'2026-06-01',valor:483.40},
+    ],
+    '2026-07':[
+      {id:1,nome:'Salário',data:'2026-07-01',valor:4400},
+      {id:2,nome:'Aux. Mãe',data:'2026-07-01',valor:300},
+      {id:3,nome:'Ticket para pag. Etios',data:'2026-07-01',valor:483.40},
+    ],
+  }
+};
+
+// ════════════════════════════════════════════════
+//  STATE + GITHUB SYNC
+// ════════════════════════════════════════════════
+let state = {};
+let ghToken = '';
+let ghSha = '';  // SHA do arquivo no GitHub (necessário para atualizar)
+
+function setSyncStatus(type, msg){
+  const el = document.getElementById('syncStatus');
+  el.className = 'sync-status sync-'+type;
+  el.textContent = msg;
+  if(type==='ok') setTimeout(()=>{ el.className='sync-status'; }, 3000);
+}
+
+async function loadFromGitHub(){
+  if(!ghToken) return false;
+  try {
+    setSyncStatus('ing','⟳ Carregando...');
+    const r = await fetch(GH_API, { headers:{ Authorization:`token ${ghToken}`, Accept:'application/vnd.github.v3+json' }});
+    if(r.status===404){ setSyncStatus('ok','✓ Novo arquivo'); return false; }
+    if(!r.ok) throw new Error(r.status);
+    const json = await r.json();
+    ghSha = json.sha;
+    const decoded = JSON.parse(atob(json.content.replace(/\n/g,'')));
+    state = decoded;
+    setSyncStatus('ok','✓ Dados carregados');
+    return true;
+  } catch(e){
+    setSyncStatus('err','✗ Erro ao carregar');
+    return false;
+  }
+}
+
+async function saveToGitHub(){
+  if(!ghToken){ localStorage.setItem('gf_state', JSON.stringify(state)); return; }
+  try {
+    setSyncStatus('ing','⟳ Salvando...');
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
+    const body = { message:'update financeiro', content, ...(ghSha ? {sha: ghSha} : {}) };
+    const r = await fetch(GH_API, {
+      method:'PUT',
+      headers:{ Authorization:`token ${ghToken}`, Accept:'application/vnd.github.v3+json', 'Content-Type':'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    ghSha = j.content.sha;
+    localStorage.setItem('gf_state', JSON.stringify(state));
+    setSyncStatus('ok','✓ Salvo no GitHub');
+  } catch(e){
+    localStorage.setItem('gf_state', JSON.stringify(state));
+    setSyncStatus('err','✗ Erro — salvo local');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════
+async function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value;
+  const t=document.getElementById('lt').value.trim();
+
+  // Tenta carregar do GitHub primeiro (ou localStorage)
+  ghToken = t || localStorage.getItem('gf_token') || '';
+  if(t) localStorage.setItem('gf_token', t);
+
+  const loaded = await loadFromGitHub();
+  if(!loaded){
+    const local = localStorage.getItem('gf_state');
+    state = local ? JSON.parse(local) : JSON.parse(JSON.stringify(INITIAL));
+  }
+
+  if(u === state.credentials.user && p === state.credentials.pass){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('app').style.display='flex';
+    init();
+  } else {
+    document.getElementById('lerr').style.display='block';
+  }
+}
+['lp','lu'].forEach(id => document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); }));
+
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('lu').value='';
+  document.getElementById('lp').value='';
+  ghSha='';
+}
+
+function alterarSenha(){
+  const sa=document.getElementById('sa').value;
+  const sn=document.getElementById('sn').value;
+  const sc=document.getElementById('sc').value;
+  const msg=document.getElementById('senha-msg');
+  if(sa!==state.credentials.pass){ showMsg('senha-msg','Senha atual incorreta.','var(--red)'); return; }
+  if(sn!==sc){ showMsg('senha-msg','Senhas não coincidem.','var(--red)'); return; }
+  if(sn.length<4){ showMsg('senha-msg','Mínimo 4 caracteres.','var(--red)'); return; }
+  state.credentials.pass=sn;
+  saveToGitHub();
+  showMsg('senha-msg','Senha alterada!','var(--green)');
+}
+
+function salvarToken(){
+  const t=document.getElementById('tokenInput').value.trim();
+  if(!t){ showMsg('token-msg','Informe o token.','var(--red)'); return; }
+  ghToken=t;
+  localStorage.setItem('gf_token',t);
+  showMsg('token-msg','Token salvo!','var(--green)');
+}
+
+function showMsg(id,txt,color){
+  const el=document.getElementById(id);
+  el.style.display='block'; el.style.color=color; el.textContent=txt;
+  setTimeout(()=>{ el.style.display='none'; },3000);
+}
+
+// ════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════
+let currentPage='dashboard';
+function showPage(page, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(btn) btn.classList.add('active');
+  currentPage=page;
+  closeSB();
+  renderPage(page);
+}
+function renderPage(page){
+  if(page==='dashboard') renderDashboard();
+  if(page==='gastos') renderGastos();
+  if(page==='parcelas') renderParcelas();
+  if(page==='fixos') renderFixos();
+  if(page==='entradas') renderEntradas();
+}
+function toggleSB(){ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('ovl').classList.toggle('open'); }
+function closeSB(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('ovl').classList.remove('open'); }
+
+// ════════════════════════════════════════════════
+//  MONTH TABS — dinâmico
+// ════════════════════════════════════════════════
+let selectedMonth = '2026-04';
+
+const CAT_COLORS={
+  'Alimentação':'#34d399','Transporte':'#38bdf8','Lazer':'#fbbf24',
+  'Saúde':'#60a5fa','Educação':'#a78bfa','Assinaturas e Serviços':'#f472b6',
+  'Gastos da Mãe':'#fb923c','Dívidas e empréstimos':'#f87171',
+  'Mecânicas e peças automotivas':'#2dd4bf','Outros':'#6b7280'
+};
+function catBadge(cat){ const c=CAT_COLORS[cat]||'#6b7280'; return `<span class="badge" style="background:${c}1a;color:${c}">${cat}</span>`; }
+
+// Retorna parcelas ativas num mês-chave
+function parcelasDoMes(key){
+  const [ky,km]=key.split('-').map(Number);
+  return (state.parcelas||[]).filter(p=>{
+    const d=new Date(p.dataInicio+'T12:00:00');
+    const py=d.getFullYear(), pm=d.getMonth()+1;
+    const endM=addMonths(py,pm,p.totalParcelas-1);
+    const startKey=mkKey(py,pm), endKey=mkKey(endM.year,endM.month);
+    return key>=startKey && key<=endKey;
+  }).map(p=>{
+    const d=new Date(p.dataInicio+'T12:00:00');
+    const py=d.getFullYear(), pm=d.getMonth()+1;
+    const diffY=ky-py, diffM=km-pm;
+    const parcNum = diffY*12+diffM+1;
+    return {...p, parcNum};
+  });
+}
+
+function buildTabs(containerId, onChange, markData){
+  const months = computeMonthRange(state);
+  const el = document.getElementById(containerId);
+  el.innerHTML='';
+  months.forEach(k=>{
+    const btn=document.createElement('button');
+    const hasData = markData ? markData(k) : false;
+    btn.className='mt'+(k===selectedMonth?' active':'')+(hasData&&k!==selectedMonth?' has-data':'');
+    btn.textContent=keyLabel(k);
+    btn.onclick=()=>{
+      selectedMonth=k;
+      document.querySelectorAll('#'+containerId+' .mt').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      onChange(k);
+    };
+    el.appendChild(btn);
+  });
+  // scroll to current
+  setTimeout(()=>{
+    const active=el.querySelector('.active');
+    if(active) active.scrollIntoView({block:'nearest',inline:'center'});
+  },50);
+}
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+function renderDashboard(){
+  buildTabs('dash-tabs', ()=>renderDashboard(), k=>{
+    return (state.gastos?.[k]?.length>0)||(state.entradas?.[k]?.length>0)||parcelasDoMes(k).length>0;
+  });
+
+  const gastos = state.gastos?.[selectedMonth] || [];
+  const entradas = state.entradas?.[selectedMonth] || [];
+  const fixos = state.fixos || [];
+  const parc = parcelasDoMes(selectedMonth);
+
+  const tGastos = gastos.reduce((s,g)=>s+parseFloat(g.valor||0),0);
+  const tEntradas = entradas.reduce((s,e)=>s+parseFloat(e.valor||0),0);
+  const tFixos = fixos.reduce((s,f)=>s+parseFloat(f.valor||0),0);
+  const tParc = parc.reduce((s,p)=>s+parseFloat(p.valorParcela||0),0);
+  const tSaidas = tFixos+tParc+tGastos;
+  const saldo = tEntradas - tSaidas;
+
+  document.getElementById('dash-cards').innerHTML=`
+    <div class="card"><div class="card-lbl">Entradas</div><div class="card-val cv-green">${fmt(tEntradas)}</div></div>
+    <div class="card"><div class="card-lbl">Fixos</div><div class="card-val cv-blue">${fmt(tFixos)}</div></div>
+    <div class="card"><div class="card-lbl">Parcelas</div><div class="card-val cv-yellow">${fmt(tParc)}</div></div>
+    <div class="card"><div class="card-lbl">Gastos Crédito</div><div class="card-val cv-red">${fmt(tGastos)}</div></div>
+    <div class="card"><div class="card-lbl">Saldo Final</div><div class="card-val ${saldo>=0?'cv-green':'cv-red'}">${fmt(saldo)}</div></div>
+  `;
+
+  // chart
+  const catMap={};
+  gastos.forEach(g=>{ catMap[g.categoria]=(catMap[g.categoria]||0)+parseFloat(g.valor||0); });
+  const sorted=Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  const maxV=sorted[0]?.[1]||1;
+  document.getElementById('dash-chart').innerHTML = sorted.length ? sorted.map(([cat,val])=>{
+    const c=CAT_COLORS[cat]||'#6b7280';
+    return `<div class="bar-row">
+      <div class="bar-lbl">${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/maxV*100).toFixed(1)}%;background:${c}"></div></div>
+      <div class="bar-val">${fmt(val)}</div>
+    </div>`;
+  }).join('') : '<div class="empty">Sem gastos neste mês</div>';
+
+  // summary
+  const pct=Math.min(100,tEntradas>0?(tSaidas/tEntradas*100):0).toFixed(0);
+  document.getElementById('dash-summary').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted)">Entradas</span><span style="color:var(--green);font-family:var(--mono)">${fmt(tEntradas)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted)">- Fixos</span><span style="color:var(--accent);font-family:var(--mono)">${fmt(tFixos)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted)">- Parcelas</span><span style="color:var(--yellow);font-family:var(--mono)">${fmt(tParc)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted)">- Gastos crédito</span><span style="color:var(--red);font-family:var(--mono)">${fmt(tGastos)}</span></div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:700;font-size:14px;">Saldo Final</span>
+        <span style="font-family:var(--mono);font-size:20px;font-weight:700;color:${saldo>=0?'var(--green)':'var(--red)'};">${fmt(saldo)}</span>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:5px;font-family:var(--mono)"><span>Comprometido</span><span>${pct}%</span></div>
+        <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%;background:${saldo>=0?'var(--green)':'var(--red)'}"></div></div>
+      </div>
+    </div>
+  `;
+}
+
+// ════════════════════════════════════════════════
+//  GASTOS
+// ════════════════════════════════════════════════
+function renderGastos(){
+  buildTabs('gastos-tabs', ()=>renderGastos(), k=>(state.gastos?.[k]?.length>0));
+  const gastos=state.gastos?.[selectedMonth]||[];
+  document.getElementById('gastos-mes-label').textContent=keyLabelFull(selectedMonth);
+  const tbody=document.getElementById('gastos-body');
+  const total=gastos.reduce((s,g)=>s+parseFloat(g.valor||0),0);
+  document.getElementById('gastos-total').textContent=fmt(total);
+  if(!gastos.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty">Nenhum gasto lançado neste mês.</div></td></tr>'; return; }
+  tbody.innerHTML=gastos.map(g=>`
+    <tr>
+      <td><strong>${g.nome}</strong></td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmtDate(g.data)}</td>
+      <td>${catBadge(g.categoria)}</td>
+      <td style="font-family:var(--mono);color:var(--red)">${fmt(g.valor)}</td>
+      <td><button class="btn-del" onclick="delGasto(${g.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function addGasto(){
+  const nome=document.getElementById('gNome').value.trim();
+  const data=document.getElementById('gData').value;
+  const cat=document.getElementById('gCat').value;
+  const valor=parseFloat(document.getElementById('gValor').value);
+  if(!nome||!data||!valor) return alert('Preencha todos os campos!');
+  if(!state.gastos) state.gastos={};
+  if(!state.gastos[selectedMonth]) state.gastos[selectedMonth]=[];
+  state.gastos[selectedMonth].push({id:uid(),nome,data,categoria:cat,valor});
+  saveToGitHub();
+  document.getElementById('gNome').value='';
+  document.getElementById('gValor').value='';
+  renderGastos();
+}
+
+function delGasto(id){
+  if(!confirm('Remover este gasto?')) return;
+  state.gastos[selectedMonth]=state.gastos[selectedMonth].filter(g=>g.id!==id);
+  saveToGitHub(); renderGastos();
+}
+
+// ════════════════════════════════════════════════
+//  PARCELAS
+// ════════════════════════════════════════════════
+function renderParcelas(){
+  buildTabs('parcelas-tabs', ()=>renderParcelas(), k=>parcelasDoMes(k).length>0);
+  const parc=parcelasDoMes(selectedMonth);
+  document.getElementById('parc-mes-label').textContent=keyLabelFull(selectedMonth);
+  const tbody=document.getElementById('parcelas-body');
+  const total=parc.reduce((s,p)=>s+parseFloat(p.valorParcela||0),0);
+  document.getElementById('parcelas-total').textContent=fmt(total);
+  if(!parc.length){ tbody.innerHTML='<tr><td colspan="7"><div class="empty">Nenhuma parcela ativa neste mês.</div></td></tr>'; return; }
+  tbody.innerHTML=parc.map(p=>{
+    const restantes=p.totalParcelas-p.parcNum+1;
+    const restTotal=restantes*parseFloat(p.valorParcela);
+    return `<tr>
+      <td><strong>${p.nome}</strong></td>
+      <td><span class="badge b-blue">${p.parcNum}/${p.totalParcelas}</span></td>
+      <td>${catBadge(p.categoria)}</td>
+      <td><span class="badge b-gray">${p.cartao}</span></td>
+      <td style="font-family:var(--mono);color:var(--yellow)">${fmt(p.valorParcela)}</td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmt(restTotal)}</td>
+      <td><button class="btn-del" onclick="delParcela(${p.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function addParcela(){
+  const nome=document.getElementById('pNome').value.trim();
+  const data=document.getElementById('pData').value;
+  const cat=document.getElementById('pCat').value;
+  const cartao=document.getElementById('pCartao').value;
+  const vp=parseFloat(document.getElementById('pVp').value);
+  const tot=parseInt(document.getElementById('pTot').value);
+  if(!nome||!data||!vp||!tot) return alert('Preencha todos os campos!');
+  if(!state.parcelas) state.parcelas=[];
+  // normaliza data para primeiro do mês para cálculo
+  const d=new Date(data+'T12:00:00');
+  const dataInicio=mkKey(d.getFullYear(),d.getMonth()+1)+'-01';
+  state.parcelas.push({id:uid(),nome,dataInicio,categoria:cat,cartao,valorParcela:vp,totalParcelas:tot});
+  saveToGitHub();
+  document.getElementById('pNome').value='';
+  document.getElementById('pVp').value='';
+  document.getElementById('pTot').value='';
+  renderParcelas();
+}
+
+function delParcela(id){
+  if(!confirm('Remover este parcelamento?')) return;
+  state.parcelas=state.parcelas.filter(p=>p.id!==id);
+  saveToGitHub(); renderParcelas();
+}
+
+// ════════════════════════════════════════════════
+//  FIXOS
+// ════════════════════════════════════════════════
+function renderFixos(){
+  const fixos=state.fixos||[];
+  const total=fixos.reduce((s,f)=>s+parseFloat(f.valor||0),0);
+  document.getElementById('fixos-total').textContent=fmt(total);
+  const tbody=document.getElementById('fixos-body');
+  if(!fixos.length){ tbody.innerHTML='<tr><td colspan="5"><div class="empty">Nenhum fixo cadastrado.</div></td></tr>'; return; }
+  tbody.innerHTML=fixos.map(f=>`
+    <tr>
+      <td><strong>${f.nome}</strong></td>
+      <td><span class="badge b-gray">${f.tipo}</span></td>
+      <td>${catBadge(f.categoria)}</td>
+      <td style="font-family:var(--mono);color:var(--accent)">${fmt(f.valor)}</td>
+      <td><button class="btn-del" onclick="delFixo(${f.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function addFixo(){
+  const nome=document.getElementById('fNome').value.trim();
+  const tipo=document.getElementById('fTipo').value;
+  const cat=document.getElementById('fCat').value;
+  const valor=parseFloat(document.getElementById('fValor').value);
+  if(!nome||!valor) return alert('Preencha nome e valor!');
+  if(!state.fixos) state.fixos=[];
+  state.fixos.push({id:uid(),nome,tipo,categoria:cat,valor});
+  saveToGitHub();
+  document.getElementById('fNome').value='';
+  document.getElementById('fValor').value='';
+  renderFixos();
+}
+
+function delFixo(id){
+  if(!confirm('Remover este fixo?')) return;
+  state.fixos=state.fixos.filter(f=>f.id!==id);
+  saveToGitHub(); renderFixos();
+}
+
+// ════════════════════════════════════════════════
+//  ENTRADAS
+// ════════════════════════════════════════════════
+function renderEntradas(){
+  buildTabs('entradas-tabs', ()=>renderEntradas(), k=>(state.entradas?.[k]?.length>0));
+  const ents=state.entradas?.[selectedMonth]||[];
+  document.getElementById('entradas-mes-label').textContent=keyLabelFull(selectedMonth);
+  const tbody=document.getElementById('entradas-body');
+  const total=ents.reduce((s,e)=>s+parseFloat(e.valor||0),0);
+  document.getElementById('entradas-total').textContent=fmt(total);
+  if(!ents.length){ tbody.innerHTML='<tr><td colspan="4"><div class="empty">Nenhuma entrada registrada.</div></td></tr>'; return; }
+  tbody.innerHTML=ents.map(e=>`
+    <tr>
+      <td><strong>${e.nome}</strong></td>
+      <td style="font-family:var(--mono);color:var(--muted)">${fmtDate(e.data)}</td>
+      <td style="font-family:var(--mono);color:var(--green)">${fmt(e.valor)}</td>
+      <td><button class="btn-del" onclick="delEntrada(${e.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function addEntrada(){
+  const nome=document.getElementById('eNome').value.trim();
+  const data=document.getElementById('eData').value;
+  const valor=parseFloat(document.getElementById('eValor').value);
+  if(!nome||!data||!valor) return alert('Preencha todos os campos!');
+  if(!state.entradas) state.entradas={};
+  if(!state.entradas[selectedMonth]) state.entradas[selectedMonth]=[];
+  state.entradas[selectedMonth].push({id:uid(),nome,data,valor});
+  saveToGitHub();
+  document.getElementById('eNome').value='';
+  document.getElementById('eData').value='';
+  document.getElementById('eValor').value='';
+  renderEntradas();
+}
+
+function delEntrada(id){
+  if(!confirm('Remover esta entrada?')) return;
+  state.entradas[selectedMonth]=state.entradas[selectedMonth].filter(e=>e.id!==id);
+  saveToGitHub(); renderEntradas();
+}
+
+// ════════════════════════════════════════════════
+//  EXPORT / IMPORT
+// ════════════════════════════════════════════════
+function exportData(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='guilherme_financas_backup.json'; a.click();
+}
+function importData(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{ state=JSON.parse(ev.target.result); saveToGitHub(); alert('Importado!'); renderPage(currentPage); }
+    catch{ alert('Arquivo inválido!'); }
+  };
+  reader.readAsText(file);
+}
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+function init(){
+  // Vai para o mês atual ou abril/2026 se não houver
+  const now=new Date();
+  const nowKey=mkKey(now.getFullYear(),now.getMonth()+1);
+  const months=computeMonthRange(state);
+  selectedMonth = months.includes(nowKey) ? nowKey : '2026-04';
+  document.getElementById('gData').value=today();
+  document.getElementById('eData').value=today();
+  document.getElementById('pData').value=today();
+  renderDashboard();
+}
+
+// pre-fill token from storage on page load
+window.addEventListener('load',()=>{
+  const t=localStorage.getItem('gf_token');
+  if(t) document.getElementById('lt').value=t;
+});
+</script>
+</body>
+</html>
